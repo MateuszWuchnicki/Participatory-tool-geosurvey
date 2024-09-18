@@ -1,0 +1,25 @@
+.leaflet-touch .leaflet-bar-part-single {
+    border-bottom: medium none;
+    border-radius: 7px;
+}
+.leaflet-touch .leaflet-control-locate {
+    background-clip: padding-box;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: none;
+}
+.leaflet-control-locate a {
+    color: #444;
+    font-size: 1.4em;
+}
+.leaflet-control-locate.active a {
+    color: #2074b6;
+}
+.leaflet-control-locate.active.following a {
+    color: #fc8428;
+}
+.leaflet-control-locate a {
+    padding: 0px 0 0 0px;
+}
+.leaflet-control-locate.requesting a {
+    padding: 0px 0 0 0px;
+}

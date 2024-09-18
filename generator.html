@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/form.css">
+    <title>GENERATOR GEOANKIETY</title>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>GENERATOR GEOANKIETY</h2>
+        <p>Aby wygenerować Geoankietę proszę przejść przez 6 etapów.</p>
+        <p class="red">Pola zaznaczone * są obowiązkowe.</p>
+
+        <form id="sampleForm" name="sampleForm" action="save_generator.php" method="post">
+            <!-- Krok 1-3 -->
+            <div class="item">
+                <p class="title">Krok 1. &nbsp;Wprowadź tytuł badania: *</p>
+                <textarea class="text" name="tytul" rows="1" maxlength="100" placeholder="Wprowadź tekst tytułu badania."></textarea>
+            </div>
+            <div class="item">
+                <p class="title">Krok 2. &nbsp;Wprowadź tekst powitalny: *</p>
+                <textarea class="text" name="start" rows="4" maxlength="2500" placeholder="Wprowadź tekst powitalny ankietera."></textarea>
+            </div>
+            <div class="item">
+                <p class="title">Krok 3. &nbsp;Wprowadź tekst podziękowania za udział w badaniu:</p>
+                <textarea class="text" name="koniec" rows="4" maxlength="2500" placeholder="Wprowadź tekst podziękowania dla ankietera."></textarea>
+            </div>
+
+            <!-- Krok 4 -->
+            <div class="item">
+                <p class="title">Krok 4. &nbsp;Wybierz liczbę pytań geoankiety: *</p>
+                <input type="hidden" name="ilosc" id="ilosc" value="">
+                <div class="button-group">
+                    <button type="button" class="active" onclick="showContent(1)">1</button>
+                    <button type="button" onclick="showContent(2)">2</button>
+                    <button type="button" onclick="showContent(3)">3</button>
+                    <button type="button" onclick="showContent(4)">4</button>
+                    <button type="button" onclick="showContent(5)">5</button>
+                    <button type="button" onclick="showContent(6)">6</button>
+                </div>
+            </div>
+
+            <div id="content-container" class="item"></div>
+
+            <!-- Krok 5 -->
+            <div class="item">
+                <p class="title">Krok 5. &nbsp;Wybierz podkład mapowy:</p>
+                <div class="kolor">
+                    <input id="topo" type="radio" name="mapa" value="osm" checked="checked" />
+                    <label for="topo">&nbsp;Mapa topograficzna - OpenStreetMap</label>
+                    <div id="mapidtopo" style="height:300px; margin-top: 10px;"></div>
+                    <input id="sate" type="radio" name="mapa" value="L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', { attribution: 'google'})" />
+                    <label for="sate">&nbsp;Zdjęcie satelitarne - GoogleMaps</label>
+                    <div id="mapidsate" style="height:300px; margin-top: 10px;"></div>
+                </div>
+            </div>
+
+            <!-- Krok 6 -->
+            <div class="item">
+                <p class="title">Krok 6. &nbsp;Przybliż mapę do obszaru, który ma być widoczny w geoankiecie.</p>
+                <div id="mapid" style="height:400px;"></div>
+                <input type="hidden" id="center" name="center">
+                <input type="hidden" id="zoom" name="zoom">
+                <!--
+                <div style="text-align: center;">
+                    <input style="margin-top: 15px; font-size: 25px;" type="submit" value="GENERUJ GEOANKIETĘ" />
+                </div>
+-->
+            </div>
+            <div class="item">
+                <div style="text-align: center;">
+                    <input style="margin-top: 15px; font-size: 25px;" type="submit" value="GENERUJ GEOANKIETĘ" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function showContent(number) {
+            const container = document.getElementById('content-container');
+            container.innerHTML = ''; // Czyści zawartość kontenera
+
+            for (let i = 1; i <= number; i++) {
+                const div = document.createElement('div');
+                div.id = `question-${i}`;
+                div.className = 'content-div';
+                div.innerHTML = ` 
+                    <div class="item-element">
+                        <p>${i}) Wprowadź pytanie ${i}: *</p>
+                    </div>
+                    <div class="item-element">
+                        <textarea name="pytanie${i}" rows="3" maxlength="500" placeholder="Wprowadź tekst pytania ${i}."></textarea>
+                    </div>
+                    <div class="item-element">
+                        <p>${i+1}) Wybierz rodzaj odpowiedzi na pytanie ${i}: *</p>
+                    </div>
+                    <div class="item-element">
+                        <div class="button-group">
+                            <button type="button" class="active" onclick="showContent(1)">Punkt</button>
+                            <button type="button" onclick="showContent(2)">Linia</button>
+                            <button type="button" onclick="showContent(3)">Poligon</button>
+                        </div>
+                    </div>
+                    <div class="item-element">
+                        <p>${i+2}) Wybierz kolor punktu do pytania ${i}: *</p>
+                    </div>
+                    <div class="color-options item-element">
+                        <div class="markers">
+                            <input type="radio" name="punkt${i}" value="ikony/marker_icon.png"><img     src="ikony/marker_icon.png" /></input>
+                            <input type="radio" name="punkt${i}" value="ikony/marker_czerwony.png"><img     src="ikony/marker_czerwony.png" /></input>
+                            <input type="radio" name="punkt${i}" value="ikony/marker_zielony.png"><img  src="ikony/marker_zielony.png" /></input>
+                            <input type="radio" name="punkt${i}" value="ikony/marker_fiolet.png"><img   src="ikony/marker_fiolet.png" /></input>
+                            <input type="radio" name="punkt${i}" value="ikony/marker_zolty.png"><img    src="ikony/marker_zolty.png" /></input>
+                            <input type="radio" name="punkt${i}" value="ikony/marker_szary.png"><img    src="ikony/marker_szary.png" /></input>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+
+            // Ustaw wartość ukrytego pola ilosc na wybraną liczbę pytań
+            document.getElementById('ilosc').value = number;
+        }
+
+        // Inicjalizacja mapy
+        var maptopo = L.map('mapidtopo').setView([52.069353576857665, 19.47951509437437], 5);
+
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(maptopo);
+
+        var mapsate = L.map('mapidsate').setView([52.069353576857665, 19.47951509437437], 5);
+
+        L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+            attribution: 'google'
+        }).addTo(mapsate);
+
+
+        var map = L.map('mapid').setView([52.069353576857665, 19.47951509437437], 5); // Ustawienie współrzędnych początkowych i zoomu
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Funkcja do aktualizacji ukrytych pól
+        function updateMapData() {
+            var center = map.getCenter();
+            document.getElementById('center').value = center.lat + ',' + center.lng;
+            document.getElementById('zoom').value = map.getZoom();
+        }
+
+        // Aktualizuj dane przy zmianie zoomu lub przesunięcia mapy
+        map.on('moveend', updateMapData);
+        map.on('zoomend', updateMapData);
+
+        // Inicjalizuj ukryte pola przy ładowaniu strony
+        updateMapData();
+
+        // Wywołaj funkcję showContent z numerem 1 przy ładowaniu strony
+        document.addEventListener('DOMContentLoaded', function() {
+            showContent(1);
+        });
+    </script>
+</body>
+
+</html>
